@@ -3,21 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>手術室儀器供應商通訊錄</title>
+    <title>🏥 手術室儀器供應商通訊錄</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
-            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-        
+
         .container {
             max-width: 1400px;
             margin: 0 auto;
@@ -26,237 +31,297 @@
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             overflow: hidden;
         }
-        
-        header {
-            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+
+        .header {
+            background: linear-gradient(135deg, #5f9e5f 0%, #3d7a3d 100%);
             color: white;
             padding: 30px;
             text-align: center;
         }
-        
-        header h1 {
-            font-size: 32px;
+
+        .header h1 {
+            font-size: 2em;
             margin-bottom: 10px;
         }
-        
-        .controls {
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .search-section {
             padding: 30px;
             background: #f8f9fa;
-            border-bottom: 2px solid #e0e0e0;
         }
-        
+
         .search-box {
             width: 100%;
             padding: 15px 20px;
-            font-size: 16px;
+            font-size: 1.1em;
             border: 2px solid #ddd;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            border-radius: 50px;
+            outline: none;
             transition: all 0.3s;
         }
-        
+
         .search-box:focus {
-            outline: none;
-            border-color: #4CAF50;
-            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+            border-color: #5f9e5f;
+            box-shadow: 0 0 0 3px rgba(95, 158, 95, 0.1);
         }
-        
+
         .filter-buttons {
             display: flex;
+            gap: 15px;
+            margin-top: 20px;
             flex-wrap: wrap;
-            gap: 10px;
         }
-        
+
         .filter-btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 25px;
+            padding: 12px 25px;
+            border: 2px solid #ddd;
             background: white;
-            color: #333;
+            border-radius: 50px;
             cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
+            font-size: 1em;
             transition: all 0.3s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-weight: 500;
         }
-        
+
         .filter-btn:hover {
-            background: #4CAF50;
+            background: #5f9e5f;
             color: white;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+            border-color: #5f9e5f;
         }
-        
+
         .filter-btn.active {
-            background: #4CAF50;
+            background: #5f9e5f;
             color: white;
+            border-color: #5f9e5f;
         }
-        
-        .table-container {
-            padding: 30px;
-            overflow-x: auto;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: white;
-        }
-        
-        thead {
-            background: #4CAF50;
-            color: white;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        
-        th {
-            padding: 15px;
-            text-align: left;
-            font-weight: 600;
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #e0e0e0;
-            font-size: 14px;
-        }
-        
-        tbody tr {
-            transition: all 0.2s;
-        }
-        
-        tbody tr:hover {
-            background: #f5f5f5;
-            transform: scale(1.01);
-        }
-        
-        .contact-btn {
-            padding: 8px 16px;
-            margin: 2px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s;
-            color: white;
-        }
-        
-        .call-btn {
-            background: #2196F3;
-        }
-        
-        .call-btn:hover {
-            background: #0b7dda;
-            transform: scale(1.05);
-        }
-        
-        .whatsapp-btn {
-            background: #25D366;
-        }
-        
-        .whatsapp-btn:hover {
-            background: #1ebd57;
-            transform: scale(1.05);
-        }
-        
-        .email-btn {
-            background: #FF5722;
-        }
-        
-        .email-btn:hover {
-            background: #e64a19;
-            transform: scale(1.05);
-        }
-        
+
         .add-btn {
             position: fixed;
             bottom: 30px;
             right: 30px;
             width: 60px;
             height: 60px;
-            background: #4CAF50;
+            background: #5f9e5f;
             color: white;
             border: none;
             border-radius: 50%;
-            font-size: 30px;
+            font-size: 2em;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
             transition: all 0.3s;
             z-index: 1000;
         }
-        
+
         .add-btn:hover {
-            transform: rotate(90deg) scale(1.1);
-            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+            transform: scale(1.1);
+            background: #3d7a3d;
         }
-        
-        .loading {
-            text-align: center;
-            padding: 50px;
-            font-size: 18px;
-            color: #666;
+
+        .table-container {
+            overflow-x: auto;
+            padding: 30px;
         }
-        
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #5f9e5f;
+            color: white;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-right: 5px;
+            transition: all 0.3s;
+        }
+
+        .call-btn {
+            background: #007bff;
+            color: white;
+        }
+
+        .call-btn:hover {
+            background: #0056b3;
+        }
+
+        .whatsapp-btn {
+            background: #25d366;
+            color: white;
+        }
+
+        .whatsapp-btn:hover {
+            background: #128c7e;
+        }
+
         .no-results {
             text-align: center;
             padding: 50px;
             color: #999;
-            font-size: 16px;
+            font-size: 1.2em;
         }
-        
-        @media (max-width: 768px) {
-            header h1 {
-                font-size: 24px;
-            }
-            
-            .filter-buttons {
-                justify-content: center;
-            }
-            
-            table {
-                font-size: 12px;
-            }
-            
-            th, td {
-                padding: 10px 5px;
-            }
-            
-            .contact-btn {
-                padding: 6px 10px;
-                font-size: 12px;
-            }
+
+        /* Modal 樣式 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal-content {
+            background: white;
+            margin: 50px auto;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 600px;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: #5f9e5f;
+            outline: none;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .submit-btn,
+        .cancel-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .submit-btn {
+            background: #5f9e5f;
+            color: white;
+        }
+
+        .submit-btn:hover {
+            background: #3d7a3d;
+        }
+
+        .cancel-btn {
+            background: #dc3545;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background: #c82333;
+        }
+
+        .close {
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: #aaa;
+        }
+
+        .close:hover {
+            color: #000;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
+        <!-- Header -->
+        <div class="header">
             <h1>🏥 手術室儀器供應商通訊錄</h1>
             <p>Medical Equipment Supplier Directory</p>
-        </header>
-        
-        <div class="controls">
-            <input type="text" id="searchBox" class="search-box" 
-                   placeholder="🔍 搜尋手術類型、品牌、供應商、聯絡人...">
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-section">
+            <input type="text" class="search-box" id="searchBox" placeholder="🔍 搜尋手術類型、品牌、供應商、聯絡人...">
             
-            <div class="filter-buttons" id="filterButtons">
+            <div class="filter-buttons">
                 <button class="filter-btn active" data-filter="all">📋 全部</button>
-                <button class="filter-btn" data-filter="ACL">🦵 ACL</button>
-                <button class="filter-btn" data-filter="Shoulder">💪 Shoulder</button>
+                <button class="filter-btn" data-filter="ACL">🦴 ACL</button>
+                <button class="filter-btn" data-filter="Shoulder">🦴 Shoulder</button>
                 <button class="filter-btn" data-filter="Spine">🦴 Spine</button>
-                <button class="filter-btn" data-filter="Knee">🦿 Knee</button>
+                <button class="filter-btn" data-filter="Knee">🦵 Knee</button>
             </div>
         </div>
-        
+
+        <!-- Table -->
         <div class="table-container">
-            <div id="loading" class="loading">載入中...</div>
-            <table id="supplierTable" style="display:none;">
+            <table id="supplierTable">
                 <thead>
                     <tr>
                         <th>手術類型</th>
@@ -270,21 +335,78 @@
                     </tr>
                 </thead>
                 <tbody id="tableBody">
+                    <tr><td colspan="8" class="no-results">載入中...</td></tr>
                 </tbody>
             </table>
-            <div id="noResults" class="no-results" style="display:none;">
-                😔 找不到相關資料
-            </div>
         </div>
     </div>
-    
-    <button class="add-btn" onclick="alert('新增功能開發中...')" title="新增供應商">+</button>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    
-<script>
-    // Firebase 配置 - 貼上你嘅 config
+    <!-- 新增按鈕 -->
+    <button class="add-btn" id="addBtn" title="新增供應商">+</button>
+
+    <!-- 新增供應商 Modal -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <h2>➕ 新增供應商</h2>
+            <form id="addSupplierForm">
+                <div class="form-group">
+                    <label>手術類型 *</label>
+                    <select id="operation" required>
+                        <option value="">請選擇...</option>
+                        <option value="ACL Reconstruction">ACL Reconstruction</option>
+                        <option value="Shoulder Arthroscopy">Shoulder Arthroscopy</option>
+                        <option value="Spine Surgery">Spine Surgery</option>
+                        <option value="Knee Surgery">Knee Surgery</option>
+                        <option value="Joint Replacement">Joint Replacement</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>儀器類型 *</label>
+                    <input type="text" id="instrumentType" placeholder="例如: Arthroscopy" required>
+                </div>
+
+                <div class="form-group">
+                    <label>品牌 *</label>
+                    <input type="text" id="brand" placeholder="例如: Arthrex" required>
+                </div>
+
+                <div class="form-group">
+                    <label>供應商 *</label>
+                    <input type="text" id="supplier" placeholder="例如: Conrad Evison" required>
+                </div>
+
+                <div class="form-group">
+                    <label>聯絡人 *</label>
+                    <input type="text" id="contactPerson" placeholder="例如: Carissa Lau" required>
+                </div>
+
+                <div class="form-group">
+                    <label>電話 *</label>
+                    <input type="tel" id="phone" placeholder="例如: 96689513" required>
+                </div>
+
+                <div class="form-group">
+                    <label>電郵</label>
+                    <input type="email" id="email" placeholder="例如: contact@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label>備註</label>
+                    <input type="text" id="remarks" placeholder="例如: Biocomposite Implant">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">✅ 儲存</button>
+                    <button type="button" class="cancel-btn" id="cancelBtn">❌ 取消</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Firebase 配置 - 請替換成你自己的配置
 const firebaseConfig = {
   apiKey: "AIzaSyDQDCUlN4uRW2Nc9T1H1FMiwfkJQgUWX1U",
   authDomain: "tkoh-ort-sales-phone-list.firebaseapp.com",
@@ -293,213 +415,73 @@ const firebaseConfig = {
   messagingSenderId: "948192293024",
   appId: "1:948192293024:web:8fe2d0d12b47344c4ed9c5"
 };
-    
-    // 初始化 Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    
-    let allSuppliers = [];
-    let filteredSuppliers = [];
-    
-    // 從 Firebase 載入數據
-    function loadSuppliers() {
-        db.collection('suppliers').get()
-            .then((snapshot) => {
-                allSuppliers = [];
-                snapshot.forEach((doc) => {
-                    allSuppliers.push(doc.data());
-                });
-                filteredSuppliers = allSuppliers;
-                renderTable();
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('supplierTable').style.display = 'table';
-            })
-            .catch((error) => {
-                console.error("Error loading data:", error);
-                document.getElementById('loading').innerHTML = '❌ 載入失敗';
-            });
-    }
-    
-    // 顯示表格
-    function renderTable() {
-        const tableBody = document.getElementById('tableBody');
-        const noResults = document.getElementById('noResults');
-        
-        tableBody.innerHTML = '';
-        
-        if (filteredSuppliers.length === 0) {
-            document.getElementById('supplierTable').style.display = 'none';
-            noResults.style.display = 'block';
-            return;
-        }
-        
-        document.getElementById('supplierTable').style.display = 'table';
-        noResults.style.display = 'none';
-        
-        filteredSuppliers.forEach((data) => {
-            const row = `
-                <tr>
-                    <td>${data.operation || '-'}</td>
-                    <td>${data.instrumentType || '-'}</td>
-                    <td>${data.brand || '-'}</td>
-                    <td>${data.supplier || '-'}</td>
-                    <td>${data.contactPerson || '-'}</td>
-                    <td>${data.phone || '-'}</td>
-                    <td>${data.remarks || '-'}</td>
-                    <td>
-                        <button class="contact-btn call-btn" onclick="call('${data.phone}')">📞 Call</button>
-                        <button class="contact-btn whatsapp-btn" onclick="whatsapp('${data.phone}')">💬 WhatsApp</button>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-    }
-    
-    // 搜尋功能
-    document.getElementById('searchBox').addEventListener('input', (e) => {
-        const searchTerm = e.target.value.toLowerCase();
-        filteredSuppliers = allSuppliers.filter(item => {
-            return Object.values(item).some(val => 
-                String(val).toLowerCase().includes(searchTerm)
-            );
-        });
-        renderTable();
-    });
-    
-    // 篩選按鈕
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            
-            const filter = this.getAttribute('data-filter');
-            if (filter === 'all') {
-                filteredSuppliers = allSuppliers;
-            } else {
-                filteredSuppliers = allSuppliers.filter(item => 
-                    item.operation && item.operation.includes(filter)
-                );
-            }
-            renderTable();
-        });
-    });
-    
-    // 聯絡功能
-    function call(phone) {
-        if (phone && phone !== '-') {
-            window.location.href = `tel:+852${phone}`;
-        }
-    }
-    
-    function whatsapp(phone) {
-        if (phone && phone !== '-') {
-            window.open(`https://wa.me/852${phone}`, '_blank');
-        }
-    }
-    
-    // 頁面載入
-    loadSuppliers();
-</script>
-        // 暫時用假數據測試（之後會連接 Firebase）
-        const testData = [
-            {
-                operation: "ACL Reconstruction",
-                instrumentType: "Arthroscopy",
-                brand: "Arthrex",
-                supplier: "Conrad Evison",
-                contactPerson: "Carissa Lau",
-                phone: "96689513",
-                email: "carissa@example.com",
-                remarks: "Biocomposite Implant"
-            },
-            {
-                operation: "Shoulder Arthroscopic Surgery",
-                instrumentType: "Implant",
-                brand: "Zimmer",
-                supplier: "Kenneth Li",
-                phone: "93920966",
-                contactPerson: "Kenneth Li",
-                email: "kenneth@example.com",
-                remarks: "Joint Replacement"
-            },
-            {
-                operation: "Spine Instrument",
-                instrumentType: "Inst & Implant",
-                brand: "Medtronic",
-                supplier: "Andrew Chan",
-                contactPerson: "Andrew Chan",
-                phone: "21991300",
-                email: "andrew@example.com",
-                remarks: "IONM"
-            }
-        ];
-        
+
+        // 初始化 Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 全局變數
         let allSuppliers = [];
         let filteredSuppliers = [];
-        
+
         // 載入數據
         function loadSuppliers() {
-            setTimeout(() => {
-                allSuppliers = testData;
-                filteredSuppliers = testData;
-                renderTable();
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('supplierTable').style.display = 'table';
-            }, 500);
+            db.collection('suppliers').get()
+                .then((querySnapshot) => {
+                    allSuppliers = [];
+                    querySnapshot.forEach((doc) => {
+                        allSuppliers.push({ id: doc.id, ...doc.data() });
+                    });
+                    filteredSuppliers = allSuppliers;
+                    renderTable();
+                })
+                .catch((error) => {
+                    console.error("載入失敗:", error);
+                    document.getElementById('tableBody').innerHTML = 
+                        '<tr><td colspan="8" class="no-results">❌ 載入失敗，請檢查網絡連接</td></tr>';
+                });
         }
-        
-        // 顯示表格
+
+        // 渲染表格
         function renderTable() {
             const tableBody = document.getElementById('tableBody');
-            const noResults = document.getElementById('noResults');
-            
-            tableBody.innerHTML = '';
             
             if (filteredSuppliers.length === 0) {
-                document.getElementById('supplierTable').style.display = 'none';
-                noResults.style.display = 'block';
+                tableBody.innerHTML = '<tr><td colspan="8" class="no-results">😔 暫無數據</td></tr>';
                 return;
             }
-            
-            document.getElementById('supplierTable').style.display = 'table';
-            noResults.style.display = 'none';
-            
-            filteredSuppliers.forEach((data) => {
-                const row = `
-                    <tr>
-                        <td>${data.operation}</td>
-                        <td>${data.instrumentType}</td>
-                        <td>${data.brand}</td>
-                        <td>${data.supplier}</td>
-                        <td>${data.contactPerson}</td>
-                        <td>${data.phone}</td>
-                        <td>${data.remarks || '-'}</td>
-                        <td>
-                            <button class="contact-btn call-btn" onclick="call('${data.phone}')">📞 Call</button>
-                            <button class="contact-btn whatsapp-btn" onclick="whatsapp('${data.phone}')">💬 WhatsApp</button>
-                        </td>
-                    </tr>
-                `;
-                tableBody.innerHTML += row;
-            });
+
+            tableBody.innerHTML = filteredSuppliers.map(data => `
+                <tr>
+                    <td>${data.operation}</td>
+                    <td>${data.instrumentType}</td>
+                    <td>${data.brand}</td>
+                    <td>${data.supplier}</td>
+                    <td>${data.contactPerson}</td>
+                    <td>${data.phone}</td>
+                    <td>${data.remarks || '-'}</td>
+                    <td>
+                        <button class="action-btn call-btn" onclick="call('${data.phone}')">📞 Call</button>
+                        <button class="action-btn whatsapp-btn" onclick="whatsapp('${data.phone}')">💬 WhatsApp</button>
+                    </td>
+                </tr>
+            `).join('');
         }
-        
+
         // 搜尋功能
         document.getElementById('searchBox').addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
-            filteredSuppliers = allSuppliers.filter(item => {
-                return Object.values(item).some(val => 
+            filteredSuppliers = allSuppliers.filter(item =>
+                Object.values(item).some(val => 
                     String(val).toLowerCase().includes(searchTerm)
-                );
-            });
+                )
+            );
             renderTable();
         });
-        
-        // 篩選按鈕
+
+        // 篩選功能
         document.querySelectorAll('.filter-btn').forEach(btn => {
             btn.addEventListener('click', function() {
-                // 移除其他按鈕的 active class
                 document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
                 
@@ -514,17 +496,59 @@ const firebaseConfig = {
                 renderTable();
             });
         });
-        
-        // 聯絡功能
+
+        // Call 功能
         function call(phone) {
             window.location.href = `tel:+852${phone}`;
         }
-        
+
+        // WhatsApp 功能
         function whatsapp(phone) {
             window.open(`https://wa.me/852${phone}`, '_blank');
         }
-        
-        // 頁面載入
+
+        // Modal 控制
+        const modal = document.getElementById('addModal');
+        const addBtn = document.getElementById('addBtn');
+        const closeModal = document.getElementById('closeModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+
+        addBtn.onclick = () => modal.style.display = 'block';
+        closeModal.onclick = () => modal.style.display = 'none';
+        cancelBtn.onclick = () => modal.style.display = 'none';
+
+        window.onclick = (e) => {
+            if (e.target == modal) modal.style.display = 'none';
+        };
+
+        // 新增供應商
+        document.getElementById('addSupplierForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const newSupplier = {
+                operation: document.getElementById('operation').value,
+                instrumentType: document.getElementById('instrumentType').value,
+                brand: document.getElementById('brand').value,
+                supplier: document.getElementById('supplier').value,
+                contactPerson: document.getElementById('contactPerson').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value,
+                remarks: document.getElementById('remarks').value
+            };
+
+            db.collection('suppliers').add(newSupplier)
+                .then(() => {
+                    alert('✅ 新增成功！');
+                    modal.style.display = 'none';
+                    document.getElementById('addSupplierForm').reset();
+                    loadSuppliers();
+                })
+                .catch((error) => {
+                    alert('❌ 新增失敗: ' + error.message);
+                });
+        });
+
+        // 初始載入
         loadSuppliers();
     </script>
 </body>
