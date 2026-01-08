@@ -283,7 +283,124 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
-    <script>
+<script>
+    // Firebase 配置 - 貼上你嘅 config
+const firebaseConfig = {
+  apiKey: "AIzaSyDQDCUlN4uRW2Nc9T1H1FMiwfkJQgUWX1U",
+  authDomain: "tkoh-ort-sales-phone-list.firebaseapp.com",
+  projectId: "tkoh-ort-sales-phone-list",
+  storageBucket: "tkoh-ort-sales-phone-list.firebasestorage.app",
+  messagingSenderId: "948192293024",
+  appId: "1:948192293024:web:8fe2d0d12b47344c4ed9c5"
+};
+    
+    // 初始化 Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    let allSuppliers = [];
+    let filteredSuppliers = [];
+    
+    // 從 Firebase 載入數據
+    function loadSuppliers() {
+        db.collection('suppliers').get()
+            .then((snapshot) => {
+                allSuppliers = [];
+                snapshot.forEach((doc) => {
+                    allSuppliers.push(doc.data());
+                });
+                filteredSuppliers = allSuppliers;
+                renderTable();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('supplierTable').style.display = 'table';
+            })
+            .catch((error) => {
+                console.error("Error loading data:", error);
+                document.getElementById('loading').innerHTML = '❌ 載入失敗';
+            });
+    }
+    
+    // 顯示表格
+    function renderTable() {
+        const tableBody = document.getElementById('tableBody');
+        const noResults = document.getElementById('noResults');
+        
+        tableBody.innerHTML = '';
+        
+        if (filteredSuppliers.length === 0) {
+            document.getElementById('supplierTable').style.display = 'none';
+            noResults.style.display = 'block';
+            return;
+        }
+        
+        document.getElementById('supplierTable').style.display = 'table';
+        noResults.style.display = 'none';
+        
+        filteredSuppliers.forEach((data) => {
+            const row = `
+                <tr>
+                    <td>${data.operation || '-'}</td>
+                    <td>${data.instrumentType || '-'}</td>
+                    <td>${data.brand || '-'}</td>
+                    <td>${data.supplier || '-'}</td>
+                    <td>${data.contactPerson || '-'}</td>
+                    <td>${data.phone || '-'}</td>
+                    <td>${data.remarks || '-'}</td>
+                    <td>
+                        <button class="contact-btn call-btn" onclick="call('${data.phone}')">📞 Call</button>
+                        <button class="contact-btn whatsapp-btn" onclick="whatsapp('${data.phone}')">💬 WhatsApp</button>
+                    </td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    }
+    
+    // 搜尋功能
+    document.getElementById('searchBox').addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        filteredSuppliers = allSuppliers.filter(item => {
+            return Object.values(item).some(val => 
+                String(val).toLowerCase().includes(searchTerm)
+            );
+        });
+        renderTable();
+    });
+    
+    // 篩選按鈕
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            const filter = this.getAttribute('data-filter');
+            if (filter === 'all') {
+                filteredSuppliers = allSuppliers;
+            } else {
+                filteredSuppliers = allSuppliers.filter(item => 
+                    item.operation && item.operation.includes(filter)
+                );
+            }
+            renderTable();
+        });
+    });
+    
+    // 聯絡功能
+    function call(phone) {
+        if (phone && phone !== '-') {
+            window.location.href = `tel:+852${phone}`;
+        }
+    }
+    
+    function whatsapp(phone) {
+        if (phone && phone !== '-') {
+            window.open(`https://wa.me/852${phone}`, '_blank');
+        }
+    }
+    
+    // 頁面載入
+    loadSuppliers();
+</script>
         // 暫時用假數據測試（之後會連接 Firebase）
         const testData = [
             {
