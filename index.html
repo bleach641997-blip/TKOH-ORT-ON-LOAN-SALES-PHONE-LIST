@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>手術室儀器供應商通訊錄</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft JhengHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.2);
+        }
+        
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .filter-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 25px;
+            background: white;
+            color: #333;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .filter-btn:hover {
+            background: #4CAF50;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(76, 175, 80, 0.3);
+        }
+        
+        .filter-btn.active {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: #4CAF50;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+        
+        tbody tr {
+            transition: all 0.2s;
+        }
+        
+        tbody tr:hover {
+            background: #f5f5f5;
+            transform: scale(1.01);
+        }
+        
+        .contact-btn {
+            padding: 8px 16px;
+            margin: 2px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: white;
+        }
+        
+        .call-btn {
+            background: #2196F3;
+        }
+        
+        .call-btn:hover {
+            background: #0b7dda;
+            transform: scale(1.05);
+        }
+        
+        .whatsapp-btn {
+            background: #25D366;
+        }
+        
+        .whatsapp-btn:hover {
+            background: #1ebd57;
+            transform: scale(1.05);
+        }
+        
+        .email-btn {
+            background: #FF5722;
+        }
+        
+        .email-btn:hover {
+            background: #e64a19;
+            transform: scale(1.05);
+        }
+        
+        .add-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+        
+        .add-btn:hover {
+            transform: rotate(90deg) scale(1.1);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.6);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 50px;
+            color: #999;
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 24px;
+            }
+            
+            .filter-buttons {
+                justify-content: center;
+            }
+            
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 10px 5px;
+            }
+            
+            .contact-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏥 手術室儀器供應商通訊錄</h1>
+            <p>Medical Equipment Supplier Directory</p>
+        </header>
+        
+        <div class="controls">
+            <input type="text" id="searchBox" class="search-box" 
+                   placeholder="🔍 搜尋手術類型、品牌、供應商、聯絡人...">
+            
+            <div class="filter-buttons" id="filterButtons">
+                <button class="filter-btn active" data-filter="all">📋 全部</button>
+                <button class="filter-btn" data-filter="ACL">🦵 ACL</button>
+                <button class="filter-btn" data-filter="Shoulder">💪 Shoulder</button>
+                <button class="filter-btn" data-filter="Spine">🦴 Spine</button>
+                <button class="filter-btn" data-filter="Knee">🦿 Knee</button>
+            </div>
+        </div>
+        
+        <div class="table-container">
+            <div id="loading" class="loading">載入中...</div>
+            <table id="supplierTable" style="display:none;">
+                <thead>
+                    <tr>
+                        <th>手術類型</th>
+                        <th>儀器類型</th>
+                        <th>品牌</th>
+                        <th>供應商</th>
+                        <th>聯絡人</th>
+                        <th>電話</th>
+                        <th>備註</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+            <div id="noResults" class="no-results" style="display:none;">
+                😔 找不到相關資料
+            </div>
+        </div>
+    </div>
+    
+    <button class="add-btn" onclick="alert('新增功能開發中...')" title="新增供應商">+</button>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // 暫時用假數據測試（之後會連接 Firebase）
+        const testData = [
+            {
+                operation: "ACL Reconstruction",
+                instrumentType: "Arthroscopy",
+                brand: "Arthrex",
+                supplier: "Conrad Evison",
+                contactPerson: "Carissa Lau",
+                phone: "96689513",
+                email: "carissa@example.com",
+                remarks: "Biocomposite Implant"
+            },
+            {
+                operation: "Shoulder Arthroscopic Surgery",
+                instrumentType: "Implant",
+                brand: "Zimmer",
+                supplier: "Kenneth Li",
+                phone: "93920966",
+                contactPerson: "Kenneth Li",
+                email: "kenneth@example.com",
+                remarks: "Joint Replacement"
+            },
+            {
+                operation: "Spine Instrument",
+                instrumentType: "Inst & Implant",
+                brand: "Medtronic",
+                supplier: "Andrew Chan",
+                contactPerson: "Andrew Chan",
+                phone: "21991300",
+                email: "andrew@example.com",
+                remarks: "IONM"
+            }
+        ];
+        
+        let allSuppliers = [];
+        let filteredSuppliers = [];
+        
+        // 載入數據
+        function loadSuppliers() {
+            setTimeout(() => {
+                allSuppliers = testData;
+                filteredSuppliers = testData;
+                renderTable();
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('supplierTable').style.display = 'table';
+            }, 500);
+        }
+        
+        // 顯示表格
+        function renderTable() {
+            const tableBody = document.getElementById('tableBody');
+            const noResults = document.getElementById('noResults');
+            
+            tableBody.innerHTML = '';
+            
+            if (filteredSuppliers.length === 0) {
+                document.getElementById('supplierTable').style.display = 'none';
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            document.getElementById('supplierTable').style.display = 'table';
+            noResults.style.display = 'none';
+            
+            filteredSuppliers.forEach((data) => {
+                const row = `
+                    <tr>
+                        <td>${data.operation}</td>
+                        <td>${data.instrumentType}</td>
+                        <td>${data.brand}</td>
+                        <td>${data.supplier}</td>
+                        <td>${data.contactPerson}</td>
+                        <td>${data.phone}</td>
+                        <td>${data.remarks || '-'}</td>
+                        <td>
+                            <button class="contact-btn call-btn" onclick="call('${data.phone}')">📞 Call</button>
+                            <button class="contact-btn whatsapp-btn" onclick="whatsapp('${data.phone}')">💬 WhatsApp</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
+            });
+        }
+        
+        // 搜尋功能
+        document.getElementById('searchBox').addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            filteredSuppliers = allSuppliers.filter(item => {
+                return Object.values(item).some(val => 
+                    String(val).toLowerCase().includes(searchTerm)
+                );
+            });
+            renderTable();
+        });
+        
+        // 篩選按鈕
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // 移除其他按鈕的 active class
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.getAttribute('data-filter');
+                if (filter === 'all') {
+                    filteredSuppliers = allSuppliers;
+                } else {
+                    filteredSuppliers = allSuppliers.filter(item => 
+                        item.operation.includes(filter)
+                    );
+                }
+                renderTable();
+            });
+        });
+        
+        // 聯絡功能
+        function call(phone) {
+            window.location.href = `tel:+852${phone}`;
+        }
+        
+        function whatsapp(phone) {
+            window.open(`https://wa.me/852${phone}`, '_blank');
+        }
+        
+        // 頁面載入
+        loadSuppliers();
+    </script>
+</body>
+</html>
