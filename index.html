@@ -24,7 +24,7 @@
         }
 
         .container {
-            max-width: 1400px;
+            max-width: 1600px;
             margin: 0 auto;
             background: white;
             border-radius: 20px;
@@ -129,6 +129,7 @@
         table {
             width: 100%;
             border-collapse: collapse;
+            font-size: 0.95em;
         }
 
         thead {
@@ -137,18 +138,52 @@
         }
 
         th {
-            padding: 15px;
+            padding: 15px 10px;
             text-align: left;
             font-weight: 600;
+            font-size: 0.9em;
         }
 
         td {
-            padding: 15px;
+            padding: 15px 10px;
             border-bottom: 1px solid #eee;
+            vertical-align: top;
         }
 
         tbody tr:hover {
             background: #f8f9fa;
+        }
+
+        .contact-info {
+            margin-bottom: 8px;
+        }
+
+        .contact-info:last-child {
+            margin-bottom: 0;
+        }
+
+        .priority-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .priority-1 {
+            background: #28a745;
+            color: white;
+        }
+
+        .priority-2 {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .priority-3 {
+            background: #6c757d;
+            color: white;
         }
 
         .action-btn {
@@ -156,9 +191,10 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 0.9em;
-            margin-right: 5px;
+            font-size: 0.85em;
+            margin: 2px;
             transition: all 0.3s;
+            display: inline-block;
         }
 
         .call-btn {
@@ -197,15 +233,18 @@
             height: 100%;
             background: rgba(0,0,0,0.5);
             animation: fadeIn 0.3s;
+            overflow-y: auto;
         }
 
         .modal-content {
             background: white;
-            margin: 50px auto;
+            margin: 30px auto;
             padding: 30px;
             border-radius: 15px;
-            max-width: 600px;
+            max-width: 700px;
             animation: slideDown 0.3s;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         @keyframes fadeIn {
@@ -234,20 +273,103 @@
             color: #555;
         }
 
+        .form-group label .optional {
+            color: #999;
+            font-weight: normal;
+            font-size: 0.9em;
+        }
+
         .form-group input,
-        .form-group select {
+        .form-group select,
+        .form-group textarea {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
             border-radius: 8px;
             font-size: 1em;
             transition: all 0.3s;
+            font-family: inherit;
         }
 
         .form-group input:focus,
-        .form-group select:focus {
+        .form-group select:focus,
+        .form-group textarea:focus {
             border-color: #5f9e5f;
             outline: none;
+        }
+
+        .contact-section {
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background: #f8f9fa;
+        }
+
+        .contact-section h3 {
+            margin-bottom: 15px;
+            color: #5f9e5f;
+            font-size: 1.1em;
+        }
+
+        .contact-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+
+        .contact-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .remove-contact {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            line-height: 1;
+        }
+
+        .remove-contact:hover {
+            background: #c82333;
+        }
+
+        .add-contact-btn {
+            width: 100%;
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 10px;
+        }
+
+        .add-contact-btn:hover {
+            background: #218838;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 2fr 2fr 2fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .form-row label {
+            font-size: 0.85em;
+            margin-bottom: 5px;
         }
 
         .form-actions {
@@ -296,6 +418,11 @@
         .close:hover {
             color: #000;
         }
+
+        .small-text {
+            font-size: 0.85em;
+            color: #666;
+        }
     </style>
 </head>
 <body>
@@ -324,18 +451,20 @@
             <table id="supplierTable">
                 <thead>
                     <tr>
-                        <th>手術類型</th>
-                        <th>儀器類型</th>
-                        <th>品牌</th>
-                        <th>供應商</th>
-                        <th>聯絡人</th>
-                        <th>電話</th>
-                        <th>備註</th>
-                        <th>操作</th>
+                        <th>Operation</th>
+                        <th>Instrument / Implant</th>
+                        <th>Brand</th>
+                        <th>Supplier</th>
+                        <th>Contact Person</th>
+                        <th>Mobile</th>
+                        <th>Fax</th>
+                        <th>Email</th>
+                        <th>Remarks</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <tr><td colspan="8" class="no-results">載入中...</td></tr>
+                    <tr><td colspan="10" class="no-results">載入中...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -348,58 +477,53 @@
     <div id="addModal" class="modal">
         <div class="modal-content">
             <span class="close" id="closeModal">&times;</span>
-            <h2>➕ 新增供應商</h2>
+            <h2>➕ 新增供應商 Add Supplier</h2>
             <form id="addSupplierForm">
                 <div class="form-group">
-                    <label>手術類型 *</label>
+                    <label>Operation 手術類型 *</label>
                     <select id="operation" required>
-                        <option value="">請選擇...</option>
+                        <option value="">請選擇 Please select...</option>
                         <option value="ACL Reconstruction">ACL Reconstruction</option>
                         <option value="Shoulder Arthroscopy">Shoulder Arthroscopy</option>
                         <option value="Spine Surgery">Spine Surgery</option>
                         <option value="Knee Surgery">Knee Surgery</option>
                         <option value="Joint Replacement">Joint Replacement</option>
+                        <option value="Hip Surgery">Hip Surgery</option>
+                        <option value="Ankle Surgery">Ankle Surgery</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label>儀器類型 *</label>
-                    <input type="text" id="instrumentType" placeholder="例如: Arthroscopy" required>
+                    <label>Instrument / Implant 儀器/植入物類型 *</label>
+                    <input type="text" id="instrumentType" placeholder="例如: Arthroscopy, Biocomposite Implant" required>
                 </div>
 
                 <div class="form-group">
-                    <label>品牌 *</label>
-                    <input type="text" id="brand" placeholder="例如: Arthrex" required>
+                    <label>Brand 品牌 *</label>
+                    <input type="text" id="brand" placeholder="例如: Arthrex, Zimmer, DePuy" required>
                 </div>
 
                 <div class="form-group">
-                    <label>供應商 *</label>
-                    <input type="text" id="supplier" placeholder="例如: Conrad Evison" required>
+                    <label>Supplier 供應商 *</label>
+                    <input type="text" id="supplier" placeholder="例如: Conrad Evison Medical" required>
+                </div>
+
+                <div class="contact-section">
+                    <h3>👥 Contact Persons 聯絡人</h3>
+                    <div id="contactsList">
+                        <!-- Contact items will be added here -->
+                    </div>
+                    <button type="button" class="add-contact-btn" id="addContactBtn">➕ 加入聯絡人 Add Contact</button>
                 </div>
 
                 <div class="form-group">
-                    <label>聯絡人 *</label>
-                    <input type="text" id="contactPerson" placeholder="例如: Carissa Lau" required>
-                </div>
-
-                <div class="form-group">
-                    <label>電話 *</label>
-                    <input type="tel" id="phone" placeholder="例如: 96689513" required>
-                </div>
-
-                <div class="form-group">
-                    <label>電郵</label>
-                    <input type="email" id="email" placeholder="例如: contact@example.com">
-                </div>
-
-                <div class="form-group">
-                    <label>備註</label>
-                    <input type="text" id="remarks" placeholder="例如: Biocomposite Implant">
+                    <label>Remarks 備註 <span class="optional">(如有 Optional)</span></label>
+                    <textarea id="remarks" rows="3" placeholder="其他備註資料..."></textarea>
                 </div>
 
                 <div class="form-actions">
-                    <button type="submit" class="submit-btn">✅ 儲存</button>
-                    <button type="button" class="cancel-btn" id="cancelBtn">❌ 取消</button>
+                    <button type="submit" class="submit-btn">✅ 儲存 Save</button>
+                    <button type="button" class="cancel-btn" id="cancelBtn">❌ 取消 Cancel</button>
                 </div>
             </form>
         </div>
@@ -423,6 +547,7 @@ const firebaseConfig = {
         // 全局變數
         let allSuppliers = [];
         let filteredSuppliers = [];
+        let contactCounter = 0;
 
         // 載入數據
         function loadSuppliers() {
@@ -438,7 +563,7 @@ const firebaseConfig = {
                 .catch((error) => {
                     console.error("載入失敗:", error);
                     document.getElementById('tableBody').innerHTML = 
-                        '<tr><td colspan="8" class="no-results">❌ 載入失敗，請檢查網絡連接</td></tr>';
+                        '<tr><td colspan="10" class="no-results">❌ 載入失敗，請檢查網絡連接</td></tr>';
                 });
         }
 
@@ -447,35 +572,79 @@ const firebaseConfig = {
             const tableBody = document.getElementById('tableBody');
             
             if (filteredSuppliers.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="8" class="no-results">😔 暫無數據</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="10" class="no-results">😔 暫無數據</td></tr>';
                 return;
             }
 
-            tableBody.innerHTML = filteredSuppliers.map(data => `
-                <tr>
-                    <td>${data.operation}</td>
-                    <td>${data.instrumentType}</td>
-                    <td>${data.brand}</td>
-                    <td>${data.supplier}</td>
-                    <td>${data.contactPerson}</td>
-                    <td>${data.phone}</td>
-                    <td>${data.remarks || '-'}</td>
-                    <td>
-                        <button class="action-btn call-btn" onclick="call('${data.phone}')">📞 Call</button>
-                        <button class="action-btn whatsapp-btn" onclick="whatsapp('${data.phone}')">💬 WhatsApp</button>
-                    </td>
-                </tr>
-            `).join('');
+            tableBody.innerHTML = filteredSuppliers.map(data => {
+                // 處理聯絡人資料
+                const contacts = data.contacts || [];
+                const contactsHTML = contacts.map((contact, index) => `
+                    <div class="contact-info">
+                        <span class="priority-badge priority-${contact.priority}">P${contact.priority}</span>
+                        ${contact.name}
+                    </div>
+                `).join('');
+
+                const mobilesHTML = contacts.map((contact, index) => `
+                    <div class="contact-info">
+                        <span class="priority-badge priority-${contact.priority}">P${contact.priority}</span>
+                        ${contact.mobile}
+                    </div>
+                `).join('');
+
+                const faxesHTML = contacts.map((contact, index) => `
+                    <div class="contact-info small-text">
+                        ${contact.fax ? `<span class="priority-badge priority-${contact.priority}">P${contact.priority}</span> ${contact.fax}` : '-'}
+                    </div>
+                `).join('');
+
+                const emailsHTML = contacts.map((contact, index) => `
+                    <div class="contact-info small-text">
+                        ${contact.email ? `<span class="priority-badge priority-${contact.priority}">P${contact.priority}</span> ${contact.email}` : '-'}
+                    </div>
+                `).join('');
+
+                // 生成動作按鈕（只顯示 Priority 1 的聯絡人）
+                const priority1Contact = contacts.find(c => c.priority === 1);
+                const actionButtons = priority1Contact ? `
+                    <button class="action-btn call-btn" onclick="call('${priority1Contact.mobile}')">📞 Call</button>
+                    <button class="action-btn whatsapp-btn" onclick="whatsapp('${priority1Contact.mobile}')">💬 WhatsApp</button>
+                ` : '-';
+
+                return `
+                    <tr>
+                        <td>${data.operation}</td>
+                        <td>${data.instrumentType}</td>
+                        <td>${data.brand}</td>
+                        <td>${data.supplier}</td>
+                        <td>${contactsHTML || '-'}</td>
+                        <td>${mobilesHTML || '-'}</td>
+                        <td>${faxesHTML || '-'}</td>
+                        <td>${emailsHTML || '-'}</td>
+                        <td>${data.remarks || '-'}</td>
+                        <td>${actionButtons}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         // 搜尋功能
         document.getElementById('searchBox').addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
-            filteredSuppliers = allSuppliers.filter(item =>
-                Object.values(item).some(val => 
-                    String(val).toLowerCase().includes(searchTerm)
-                )
-            );
+            filteredSuppliers = allSuppliers.filter(item => {
+                // 搜尋基本資料
+                const basicMatch = [item.operation, item.instrumentType, item.brand, item.supplier, item.remarks]
+                    .some(val => String(val || '').toLowerCase().includes(searchTerm));
+                
+                // 搜尋聯絡人資料
+                const contactMatch = (item.contacts || []).some(contact => 
+                    [contact.name, contact.mobile, contact.fax, contact.email]
+                        .some(val => String(val || '').toLowerCase().includes(searchTerm))
+                );
+                
+                return basicMatch || contactMatch;
+            });
             renderTable();
         });
 
@@ -507,33 +676,124 @@ const firebaseConfig = {
             window.open(`https://wa.me/852${phone}`, '_blank');
         }
 
+        // 新增聯絡人欄位
+        function addContactField() {
+            contactCounter++;
+            const contactsList = document.getElementById('contactsList');
+            const contactItem = document.createElement('div');
+            contactItem.className = 'contact-item';
+            contactItem.id = `contact-${contactCounter}`;
+            
+            contactItem.innerHTML = `
+                <button type="button" class="remove-contact" onclick="removeContact(${contactCounter})">×</button>
+                <div class="form-row">
+                    <div>
+                        <label>Priority *</label>
+                        <select class="contact-priority" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Name *</label>
+                        <input type="text" class="contact-name" placeholder="聯絡人姓名" required>
+                    </div>
+                    <div>
+                        <label>Mobile *</label>
+                        <input type="tel" class="contact-mobile" placeholder="96689513" required>
+                    </div>
+                    <div>
+                        <label>Fax <span class="optional">(如有)</span></label>
+                        <input type="tel" class="contact-fax" placeholder="21234567">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Email <span class="optional">(如有 Optional)</span></label>
+                    <input type="email" class="contact-email" placeholder="contact@example.com">
+                </div>
+            `;
+            
+            contactsList.appendChild(contactItem);
+        }
+
+        // 移除聯絡人
+        function removeContact(id) {
+            const contactItem = document.getElementById(`contact-${id}`);
+            if (contactItem) {
+                contactItem.remove();
+            }
+        }
+
         // Modal 控制
         const modal = document.getElementById('addModal');
         const addBtn = document.getElementById('addBtn');
         const closeModal = document.getElementById('closeModal');
         const cancelBtn = document.getElementById('cancelBtn');
+        const addContactBtn = document.getElementById('addContactBtn');
 
-        addBtn.onclick = () => modal.style.display = 'block';
-        closeModal.onclick = () => modal.style.display = 'none';
-        cancelBtn.onclick = () => modal.style.display = 'none';
+        addBtn.onclick = () => {
+            modal.style.display = 'block';
+            // 清空聯絡人列表
+            document.getElementById('contactsList').innerHTML = '';
+            contactCounter = 0;
+            // 預設加入一個聯絡人欄位
+            addContactField();
+        };
+
+        closeModal.onclick = () => {
+            modal.style.display = 'none';
+            document.getElementById('addSupplierForm').reset();
+        };
+
+        cancelBtn.onclick = () => {
+            modal.style.display = 'none';
+            document.getElementById('addSupplierForm').reset();
+        };
+
+        addContactBtn.onclick = addContactField;
 
         window.onclick = (e) => {
-            if (e.target == modal) modal.style.display = 'none';
+            if (e.target == modal) {
+                modal.style.display = 'none';
+                document.getElementById('addSupplierForm').reset();
+            }
         };
 
         // 新增供應商
         document.getElementById('addSupplierForm').addEventListener('submit', (e) => {
             e.preventDefault();
             
+            // 收集所有聯絡人資料
+            const contactItems = document.querySelectorAll('.contact-item');
+            const contacts = [];
+            
+            contactItems.forEach(item => {
+                const priority = parseInt(item.querySelector('.contact-priority').value);
+                const name = item.querySelector('.contact-name').value;
+                const mobile = item.querySelector('.contact-mobile').value;
+                const fax = item.querySelector('.contact-fax').value;
+                const email = item.querySelector('.contact-email').value;
+                
+                contacts.push({
+                    priority,
+                    name,
+                    mobile,
+                    fax: fax || null,
+                    email: email || null
+                });
+            });
+
+            // 按 priority 排序
+            contacts.sort((a, b) => a.priority - b.priority);
+
             const newSupplier = {
                 operation: document.getElementById('operation').value,
                 instrumentType: document.getElementById('instrumentType').value,
                 brand: document.getElementById('brand').value,
                 supplier: document.getElementById('supplier').value,
-                contactPerson: document.getElementById('contactPerson').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value,
-                remarks: document.getElementById('remarks').value
+                contacts: contacts,
+                remarks: document.getElementById('remarks').value || null
             };
 
             db.collection('suppliers').add(newSupplier)
