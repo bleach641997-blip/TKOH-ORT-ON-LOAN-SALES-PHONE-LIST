@@ -186,15 +186,6 @@
             color: white;
         }
 
-        .tag {
-            display: inline-block;
-            background: #e9ecef;
-            padding: 4px 10px;
-            margin: 2px;
-            border-radius: 15px;
-            font-size: 0.85em;
-        }
-
         .action-btn {
             padding: 8px 15px;
             border: none;
@@ -433,100 +424,31 @@
             color: #666;
         }
 
-        /* Multi-select 樣式 */
-        .multi-select-container {
-            position: relative;
-        }
-
-        .selected-tags {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 5px;
-            padding: 8px;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            min-height: 50px;
-            background: white;
-            cursor: pointer;
-        }
-
-        .selected-tags:focus-within {
-            border-color: #5f9e5f;
-        }
-
-        .selected-tag {
-            background: #5f9e5f;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 0.9em;
-        }
-
-        .remove-tag {
-            cursor: pointer;
-            font-weight: bold;
-            background: rgba(255,255,255,0.3);
-            border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.9em;
-        }
-
-        .remove-tag:hover {
-            background: rgba(255,255,255,0.5);
-        }
-
-        .multi-select-input {
-            border: none;
-            outline: none;
-            padding: 5px;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .dropdown-options {
+        .suggestions {
             position: absolute;
-            top: 100%;
-            left: 0;
-            right: 0;
             background: white;
             border: 2px solid #5f9e5f;
-            border-top: none;
-            border-radius: 0 0 8px 8px;
+            border-radius: 8px;
             max-height: 200px;
             overflow-y: auto;
-            display: none;
+            width: calc(100% - 24px);
             z-index: 1000;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
         }
 
-        .dropdown-options.show {
-            display: block;
-        }
-
-        .dropdown-option {
-            padding: 10px;
+        .suggestion-item {
+            padding: 10px 15px;
             cursor: pointer;
             transition: background 0.2s;
         }
 
-        .dropdown-option:hover {
+        .suggestion-item:hover {
             background: #f0f0f0;
         }
 
-        .dropdown-option.selected {
-            background: #e8f5e9;
-        }
-
-        .hint-text {
-            color: #999;
-            font-size: 0.85em;
-            margin-top: 5px;
+        .input-wrapper {
+            position: relative;
         }
     </style>
 </head>
@@ -542,12 +464,9 @@
         <div class="search-section">
             <input type="text" class="search-box" id="searchBox" placeholder="🔍 搜尋手術類型、品牌、供應商、聯絡人...">
             
-            <div class="filter-buttons">
+            <div class="filter-buttons" id="filterButtons">
                 <button class="filter-btn active" data-filter="all">📋 全部</button>
-                <button class="filter-btn" data-filter="ACL">🦴 ACL</button>
-                <button class="filter-btn" data-filter="Shoulder">🦴 Shoulder</button>
-                <button class="filter-btn" data-filter="Spine">🦴 Spine</button>
-                <button class="filter-btn" data-filter="Knee">🦵 Knee</button>
+                <!-- 動態生成的篩選按鈕會顯示在這裡 -->
             </div>
         </div>
 
@@ -585,25 +504,16 @@
             <h2>➕ 新增供應商 Add Supplier</h2>
             <form id="addSupplierForm">
                 <div class="form-group">
-                    <label>Operation 手術類型 * <span class="optional">(可選擇多個)</span></label>
-                    <div class="multi-select-container">
-                        <div class="selected-tags" id="operationTags" onclick="showOperationDropdown()">
-                            <input type="text" class="multi-select-input" id="operationInput" placeholder="點擊選擇或輸入...">
-                        </div>
-                        <div class="dropdown-options" id="operationDropdown"></div>
+                    <label>Operation 手術類型 *</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="operation" placeholder="例如: ACL Reconstruction, Shoulder Arthroscopy" required autocomplete="off">
+                        <div id="operationSuggestions" class="suggestions"></div>
                     </div>
-                    <div class="hint-text">💡 可選擇多個手術類型，或輸入自訂項目後按 Enter</div>
                 </div>
 
                 <div class="form-group">
-                    <label>Instrument / Implant 儀器/植入物類型 * <span class="optional">(可選擇多個)</span></label>
-                    <div class="multi-select-container">
-                        <div class="selected-tags" id="instrumentTags" onclick="showInstrumentDropdown()">
-                            <input type="text" class="multi-select-input" id="instrumentInput" placeholder="點擊選擇或輸入...">
-                        </div>
-                        <div class="dropdown-options" id="instrumentDropdown"></div>
-                    </div>
-                    <div class="hint-text">💡 可選擇多個儀器類型，或輸入自訂項目後按 Enter</div>
+                    <label>Instrument / Implant 儀器/植入物類型 *</label>
+                    <input type="text" id="instrumentType" placeholder="例如: Arthroscopy, Biocomposite Implant" required>
                 </div>
 
                 <div class="form-group">
@@ -647,6 +557,7 @@ const firebaseConfig = {
   messagingSenderId: "948192293024",
   appId: "1:948192293024:web:8fe2d0d12b47344c4ed9c5"
 };
+
         // 初始化 Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
@@ -655,192 +566,25 @@ const firebaseConfig = {
         let allSuppliers = [];
         let filteredSuppliers = [];
         let contactCounter = 0;
-
-        // 預設選項
-        const operationOptions = [
-            'ACL Reconstruction',
-            'Shoulder Arthroscopy',
-            'Spine Surgery',
-            'Knee Surgery',
-            'Joint Replacement',
-            'Hip Surgery',
-            'Ankle Surgery'
-        ];
-
-        const instrumentOptions = [
-            'Arthroscopy',
-            'Biocomposite Implant',
-            'Screw System',
-            'Plate System',
-            'Suture Anchor',
-            'Graft',
-            'Drill',
-            'Saw',
-            'Prosthesis'
-        ];
-
-        // 儲存選中的項目
-        let selectedOperations = [];
-        let selectedInstruments = [];
-
-        // 初始化下拉選單
-        function initDropdowns() {
-            const operationDropdown = document.getElementById('operationDropdown');
-            const instrumentDropdown = document.getElementById('instrumentDropdown');
-
-            operationDropdown.innerHTML = operationOptions.map(opt => 
-                `<div class="dropdown-option" onclick="toggleOperation('${opt}')">${opt}</div>`
-            ).join('');
-
-            instrumentDropdown.innerHTML = instrumentOptions.map(opt => 
-                `<div class="dropdown-option" onclick="toggleInstrument('${opt}')">${opt}</div>`
-            ).join('');
-        }
-
-        // 顯示下拉選單
-        function showOperationDropdown() {
-            const dropdown = document.getElementById('operationDropdown');
-            dropdown.classList.add('show');
-            document.getElementById('operationInput').focus();
-        }
-
-        function showInstrumentDropdown() {
-            const dropdown = document.getElementById('instrumentDropdown');
-            dropdown.classList.add('show');
-            document.getElementById('instrumentInput').focus();
-        }
-
-        // 隱藏下拉選單
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.multi-select-container')) {
-                document.querySelectorAll('.dropdown-options').forEach(dd => dd.classList.remove('show'));
-            }
-        });
-
-        // Toggle Operation
-        function toggleOperation(option) {
-            const index = selectedOperations.indexOf(option);
-            if (index > -1) {
-                selectedOperations.splice(index, 1);
-            } else {
-                selectedOperations.push(option);
-            }
-            updateOperationTags();
-            updateDropdownStates('operation');
-        }
-
-        // Toggle Instrument
-        function toggleInstrument(option) {
-            const index = selectedInstruments.indexOf(option);
-            if (index > -1) {
-                selectedInstruments.splice(index, 1);
-            } else {
-                selectedInstruments.push(option);
-            }
-            updateInstrumentTags();
-            updateDropdownStates('instrument');
-        }
-
-        // 更新標籤顯示
-        function updateOperationTags() {
-            const container = document.getElementById('operationTags');
-            const input = document.getElementById('operationInput');
-            
-            container.innerHTML = selectedOperations.map(op => 
-                `<span class="selected-tag">${op} <span class="remove-tag" onclick="removeOperation('${op}')">×</span></span>`
-            ).join('') + input.outerHTML;
-        }
-
-        function updateInstrumentTags() {
-            const container = document.getElementById('instrumentTags');
-            const input = document.getElementById('instrumentInput');
-            
-            container.innerHTML = selectedInstruments.map(inst => 
-                `<span class="selected-tag">${inst} <span class="remove-tag" onclick="removeInstrument('${inst}')">×</span></span>`
-            ).join('') + input.outerHTML;
-        }
-
-        // 移除標籤
-        function removeOperation(option) {
-            const index = selectedOperations.indexOf(option);
-            if (index > -1) {
-                selectedOperations.splice(index, 1);
-                updateOperationTags();
-                updateDropdownStates('operation');
-            }
-        }
-
-        function removeInstrument(option) {
-            const index = selectedInstruments.indexOf(option);
-            if (index > -1) {
-                selectedInstruments.splice(index, 1);
-                updateInstrumentTags();
-                updateDropdownStates('instrument');
-            }
-        }
-
-        // 更新下拉選單狀態
-        function updateDropdownStates(type) {
-            if (type === 'operation') {
-                document.querySelectorAll('#operationDropdown .dropdown-option').forEach(opt => {
-                    if (selectedOperations.includes(opt.textContent)) {
-                        opt.classList.add('selected');
-                    } else {
-                        opt.classList.remove('selected');
-                    }
-                });
-            } else {
-                document.querySelectorAll('#instrumentDropdown .dropdown-option').forEach(opt => {
-                    if (selectedInstruments.includes(opt.textContent)) {
-                        opt.classList.add('selected');
-                    } else {
-                        opt.classList.remove('selected');
-                    }
-                });
-            }
-        }
-
-        // 處理 Enter 鍵輸入自訂項目
-        document.addEventListener('DOMContentLoaded', () => {
-            const operationInput = document.getElementById('operationInput');
-            const instrumentInput = document.getElementById('instrumentInput');
-
-            operationInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const value = operationInput.value.trim();
-                    if (value && !selectedOperations.includes(value)) {
-                        selectedOperations.push(value);
-                        updateOperationTags();
-                        operationInput.value = '';
-                    }
-                }
-            });
-
-            instrumentInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    const value = instrumentInput.value.trim();
-                    if (value && !selectedInstruments.includes(value)) {
-                        selectedInstruments.push(value);
-                        updateInstrumentTags();
-                        instrumentInput.value = '';
-                    }
-                }
-            });
-
-            initDropdowns();
-        });
+        let uniqueOperations = new Set();
 
         // 載入數據
         function loadSuppliers() {
             db.collection('suppliers').get()
                 .then((querySnapshot) => {
                     allSuppliers = [];
+                    uniqueOperations.clear();
+                    
                     querySnapshot.forEach((doc) => {
-                        allSuppliers.push({ id: doc.id, ...doc.data() });
+                        const data = { id: doc.id, ...doc.data() };
+                        allSuppliers.push(data);
+                        if (data.operation) {
+                            uniqueOperations.add(data.operation);
+                        }
                     });
+                    
                     filteredSuppliers = allSuppliers;
+                    updateFilterButtons();
                     renderTable();
                 })
                 .catch((error) => {
@@ -848,6 +592,44 @@ const firebaseConfig = {
                     document.getElementById('tableBody').innerHTML = 
                         '<tr><td colspan="10" class="no-results">❌ 載入失敗，請檢查網絡連接</td></tr>';
                 });
+        }
+
+        // 更新篩選按鈕
+        function updateFilterButtons() {
+            const filterButtons = document.getElementById('filterButtons');
+            
+            // 保留「全部」按鈕
+            filterButtons.innerHTML = '<button class="filter-btn active" data-filter="all">📋 全部</button>';
+            
+            // 為每個唯一的 operation 創建篩選按鈕
+            Array.from(uniqueOperations).sort().forEach(operation => {
+                const btn = document.createElement('button');
+                btn.className = 'filter-btn';
+                btn.setAttribute('data-filter', operation);
+                
+                // 簡化顯示文字（取前面的關鍵詞）
+                const displayText = operation.length > 20 ? operation.substring(0, 18) + '...' : operation;
+                btn.textContent = displayText;
+                btn.title = operation; // 完整文字顯示在 tooltip
+                
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    filteredSuppliers = allSuppliers.filter(item => item.operation === operation);
+                    renderTable();
+                });
+                
+                filterButtons.appendChild(btn);
+            });
+
+            // 重新綁定「全部」按鈕的事件
+            filterButtons.querySelector('[data-filter="all"]').addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                filteredSuppliers = allSuppliers;
+                renderTable();
+            });
         }
 
         // 渲染表格
@@ -860,16 +642,6 @@ const firebaseConfig = {
             }
 
             tableBody.innerHTML = filteredSuppliers.map(data => {
-                // 處理 Operations (array)
-                const operationsHTML = (data.operations || []).map(op => 
-                    `<span class="tag">${op}</span>`
-                ).join('');
-
-                // 處理 Instruments (array)
-                const instrumentsHTML = (data.instruments || []).map(inst => 
-                    `<span class="tag">${inst}</span>`
-                ).join('');
-
                 // 處理聯絡人資料
                 const contacts = data.contacts || [];
                 const contactsHTML = contacts.map((contact, index) => `
@@ -907,8 +679,8 @@ const firebaseConfig = {
 
                 return `
                     <tr>
-                        <td>${operationsHTML || '-'}</td>
-                        <td>${instrumentsHTML || '-'}</td>
+                        <td>${data.operation}</td>
+                        <td>${data.instrumentType}</td>
                         <td>${data.brand}</td>
                         <td>${data.supplier}</td>
                         <td>${contactsHTML || '-'}</td>
@@ -922,20 +694,51 @@ const firebaseConfig = {
             }).join('');
         }
 
+        // Operation 輸入建議
+        const operationInput = document.getElementById('operation');
+        const suggestionBox = document.getElementById('operationSuggestions');
+
+        operationInput.addEventListener('input', (e) => {
+            const value = e.target.value.toLowerCase();
+            
+            if (value.length === 0) {
+                suggestionBox.style.display = 'none';
+                return;
+            }
+
+            const matches = Array.from(uniqueOperations).filter(op => 
+                op.toLowerCase().includes(value)
+            );
+
+            if (matches.length > 0) {
+                suggestionBox.innerHTML = matches.map(op => 
+                    `<div class="suggestion-item" onclick="selectOperation('${op.replace(/'/g, "\\'")}')">${op}</div>`
+                ).join('');
+                suggestionBox.style.display = 'block';
+            } else {
+                suggestionBox.style.display = 'none';
+            }
+        });
+
+        // 選擇建議的 operation
+        function selectOperation(operation) {
+            document.getElementById('operation').value = operation;
+            document.getElementById('operationSuggestions').style.display = 'none';
+        }
+
+        // 點擊外部關閉建議框
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.input-wrapper')) {
+                suggestionBox.style.display = 'none';
+            }
+        });
+
         // 搜尋功能
         document.getElementById('searchBox').addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             filteredSuppliers = allSuppliers.filter(item => {
-                // 搜尋 operations 和 instruments (arrays)
-                const operationMatch = (item.operations || []).some(op => 
-                    op.toLowerCase().includes(searchTerm)
-                );
-                const instrumentMatch = (item.instruments || []).some(inst => 
-                    inst.toLowerCase().includes(searchTerm)
-                );
-                
-                // 搜尋其他基本資料
-                const basicMatch = [item.brand, item.supplier, item.remarks]
+                // 搜尋基本資料
+                const basicMatch = [item.operation, item.instrumentType, item.brand, item.supplier, item.remarks]
                     .some(val => String(val || '').toLowerCase().includes(searchTerm));
                 
                 // 搜尋聯絡人資料
@@ -944,27 +747,9 @@ const firebaseConfig = {
                         .some(val => String(val || '').toLowerCase().includes(searchTerm))
                 );
                 
-                return operationMatch || instrumentMatch || basicMatch || contactMatch;
+                return basicMatch || contactMatch;
             });
             renderTable();
-        });
-
-        // 篩選功能
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                
-                const filter = this.getAttribute('data-filter');
-                if (filter === 'all') {
-                    filteredSuppliers = allSuppliers;
-                } else {
-                    filteredSuppliers = allSuppliers.filter(item => 
-                        (item.operations || []).some(op => op.includes(filter))
-                    );
-                }
-                renderTable();
-            });
         });
 
         // Call 功能
@@ -1038,11 +823,6 @@ const firebaseConfig = {
             // 清空聯絡人列表
             document.getElementById('contactsList').innerHTML = '';
             contactCounter = 0;
-            // 清空選擇
-            selectedOperations = [];
-            selectedInstruments = [];
-            updateOperationTags();
-            updateInstrumentTags();
             // 預設加入一個聯絡人欄位
             addContactField();
         };
@@ -1050,15 +830,11 @@ const firebaseConfig = {
         closeModal.onclick = () => {
             modal.style.display = 'none';
             document.getElementById('addSupplierForm').reset();
-            selectedOperations = [];
-            selectedInstruments = [];
         };
 
         cancelBtn.onclick = () => {
             modal.style.display = 'none';
             document.getElementById('addSupplierForm').reset();
-            selectedOperations = [];
-            selectedInstruments = [];
         };
 
         addContactBtn.onclick = addContactField;
@@ -1067,25 +843,12 @@ const firebaseConfig = {
             if (e.target == modal) {
                 modal.style.display = 'none';
                 document.getElementById('addSupplierForm').reset();
-                selectedOperations = [];
-                selectedInstruments = [];
             }
         };
 
         // 新增供應商
         document.getElementById('addSupplierForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            // 驗證是否至少選擇了一個 Operation 和 Instrument
-            if (selectedOperations.length === 0) {
-                alert('❌ 請至少選擇一個手術類型 (Operation)');
-                return;
-            }
-            
-            if (selectedInstruments.length === 0) {
-                alert('❌ 請至少選擇一個儀器類型 (Instrument)');
-                return;
-            }
             
             // 收集所有聯絡人資料
             const contactItems = document.querySelectorAll('.contact-item');
@@ -1111,8 +874,8 @@ const firebaseConfig = {
             contacts.sort((a, b) => a.priority - b.priority);
 
             const newSupplier = {
-                operations: selectedOperations,  // Array
-                instruments: selectedInstruments,  // Array
+                operation: document.getElementById('operation').value.trim(),
+                instrumentType: document.getElementById('instrumentType').value,
                 brand: document.getElementById('brand').value,
                 supplier: document.getElementById('supplier').value,
                 contacts: contacts,
@@ -1124,8 +887,6 @@ const firebaseConfig = {
                     alert('✅ 新增成功！');
                     modal.style.display = 'none';
                     document.getElementById('addSupplierForm').reset();
-                    selectedOperations = [];
-                    selectedInstruments = [];
                     loadSuppliers();
                 })
                 .catch((error) => {
